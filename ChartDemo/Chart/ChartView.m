@@ -152,12 +152,10 @@
         rightTopTitle.textAlignment = NSTextAlignmentCenter;
         rightTopTitle.font = [UIFont systemFontOfSize:kTopTitleFont];
         rightTopTitle.textColor = kTopTitleColor;
-//        rightTopTitle.layer.borderColor = kTopTitleColor.CGColor;
-//        rightTopTitle.layer.borderWidth = kTitleLineWidth;
-//        rightTopTitle.clipsToBounds = YES;
         rightTopTitle.backgroundColor = [UIColor clearColor];
         [self.rightTopScrollView addSubview:rightTopTitle];
-        UIView *topVLine = [[UIView alloc] initWithFrame:CGRectMake((i + 1) * (kContentItemWidth + kTitleLineWidth) -  (i+1) *kContentLineWidth*1.3, 0, 0.5, kTopTitleHeight)];
+        //以下坐标算法是为了调整顶部标题栏的竖线与下面内容线不对齐的问题，解决方案很不好，有待完善
+        UIView *topVLine = [[UIView alloc] initWithFrame:CGRectMake((i + 1) * (kContentItemWidth + kTitleLineWidth) -  (i+1) *kContentLineWidth * 1.3, 0, 0.5, kTopTitleHeight)];
         topVLine.backgroundColor = kLineInsideColer;
         [self.rightTopScrollView addSubview:topVLine];
     }
@@ -196,7 +194,6 @@
         title.textColor = kLeftTitleColor;
         title.font = [UIFont systemFontOfSize:kLeftTitleFont];
         [cell.contentView addSubview:title];
-        //cell.backgroundColor = [UIColor greenColor];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         return cell;
     }
@@ -224,9 +221,6 @@
     return self.leftData.count - 1;
 }
 -(void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath{
-//    if (indexPath.row == 0) {
-//        return ;
-//    }
     if (self.contentAllImages.count) {
         [self createChartAllImagesContentWith:cell indexpath:indexPath];
     }else if (self.contentAllTitles.count) {
@@ -246,28 +240,16 @@
         cell.layer.borderWidth = kContentLineWidth;
         cell.layer.borderColor = kLineInsideColer.CGColor;
         cell.clipsToBounds = YES;
-//        if (indexPath.row == 0) {
-//            UILabel *content = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, cell.bounds.size.width, cell.bounds.size.height)];
-//            content.font = [UIFont systemFontOfSize:kTopTitleFont];
-//            content.textAlignment = NSTextAlignmentCenter;
-//            [cell.contentView addSubview:content];
-//            content.text = self.topTitleData[indexPath.section];
-//        }
         return cell;
     }
     return nil;
 }
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     if (collectionView == self.contentCollectionView) {
-       // if (indexPath.row != 0) {
-            if ([self.delegate respondsToSelector:@selector(chartViewDidSelecteItemAtRow:column:)]) {
-                [self.delegate chartViewDidSelecteItemAtRow:indexPath.row column:indexPath.section];
-                //[self.delegate performSelector:@selector(chartViewDidSelecteItemAtRow:column:) withObject:nil];
-            }
-            NSLog(@"选中item：第%d行  %d列",indexPath.row,indexPath.section);
-       // }
+        if ([self.delegate respondsToSelector:@selector(chartViewDidSelecteItemAtRow:column:)]) {
+            [self.delegate chartViewDidSelecteItemAtRow:indexPath.row column:indexPath.section];
+        }
     }
-    
 }
 #pragma mark - 创建表格内容视图
 -(void)createChartAllImagesContentWith:(UICollectionViewCell *)cell indexpath:(NSIndexPath *)indexPath{
