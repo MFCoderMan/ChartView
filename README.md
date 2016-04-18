@@ -1,7 +1,7 @@
 # ChartView
 A demo to make it easy for making a chart.
 
-- 特点：
+#### 特点：
 + 调用极简，一句代码即可搞定；
 + 可定制，放置图片或者文字均可；
 + 可单独设置单个单元格，或者整体设定所有的单元格；
