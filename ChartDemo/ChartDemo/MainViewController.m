@@ -26,10 +26,10 @@
 #if 0
     NSArray *itemImageDatas = @[@{@"0:1":@"fullOrdered"},@{@"3:3":@"ordered"}];
     charView = [[ChartView alloc] initWithFrame:CGRectMake(10, 80, kScreenWidth - 20, kscreenHeight - 290) leftTitles:leftTitles topTitles:topTitles itemImageDatas:itemImageDatas];
-#elif 1
+#elif 0
     NSArray *itemTitleDatas = @[@{@"0:1":@"item0-1"},@{@"3:3":@"item3-3"}];
     charView = [[ChartView alloc] initWithFrame:CGRectMake(10, 80, kScreenWidth - 20, kscreenHeight - 290) leftTitles:leftTitles topTitles:topTitles itemTitleDatas:itemTitleDatas];
-#elif 1
+#elif 0
     NSMutableArray *allTitles = [[NSMutableArray alloc] init];
     for (int i =0; i < (leftTitles.count - 1) * topTitles.count; i ++) {
         [allTitles addObject:[NSString stringWithFormat:@"%d",i]];

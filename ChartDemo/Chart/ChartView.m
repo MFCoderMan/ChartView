@@ -12,6 +12,7 @@
 @interface ChartView ()<UITableViewDelegate,UITableViewDataSource,UICollectionViewDelegate,UICollectionViewDataSource>
 
 @property (nonatomic, strong) UITableView      *leftTableView;
+@property (nonatomic, strong) UIScrollView     *rightTopScrollView;
 @property (nonatomic, strong) UIScrollView     *contentScrollView;
 @property (nonatomic, strong) UICollectionView *contentCollectionView;
 @property (nonatomic, strong) NSMutableArray   *leftData;
@@ -77,7 +78,15 @@
 }
 #pragma mark - 左边标题栏
 -(void)createLeftTableView{
-    CGFloat tableHeight = kContentItemHeight * self.leftData.count;
+    //第一行标题
+    UILabel *leftTitle = [[UILabel alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, kChartBorderLineWidth, kLeftItemWidth, kTopTitleHeight)];
+    leftTitle.text = self.leftData[0];
+    leftTitle.font = [UIFont systemFontOfSize:kLeftTopTitleFont];
+    leftTitle.textAlignment = NSTextAlignmentCenter;
+    leftTitle.textColor = kLeftTopTitleColor;
+    [self addSubview:leftTitle];
+    
+    CGFloat tableHeight = kContentItemHeight * (self.leftData.count - 1);
     if (self.frame.size.height > tableHeight) {
         CGRect tempFrame      = self.frame;
         tempFrame.size.height = tableHeight;
@@ -85,7 +94,7 @@
     }else if (self.frame.size.height < tableHeight){
         tableHeight = self.frame.size.height;
     }
-    self.leftTableView = [[UITableView alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, kChartBorderLineWidth, kLeftItemWidth, tableHeight) style:UITableViewStylePlain];
+    self.leftTableView = [[UITableView alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, kChartBorderLineWidth + kTopTitleHeight, kLeftItemWidth, tableHeight - kTopTitleHeight) style:UITableViewStylePlain];
     self.leftTableView.dataSource                     = self;
     self.leftTableView.delegate                       = self;
     self.leftTableView.separatorInset                 = UIEdgeInsetsZero;
@@ -95,9 +104,12 @@
     self.leftTableView.showsHorizontalScrollIndicator = NO;
     [self addSubview:self.leftTableView];
     [self.leftTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:kLeftTableViewCellId];
-    UIView *vLine = [[UIView alloc] initWithFrame:CGRectMake(self.leftTableView.frame.origin.x + self.leftTableView.frame.size.width, self.leftTableView.frame.origin.y, kTitleContentSeperateLineWidth, self.leftTableView.frame.size.height)];
+    UIView *vLine = [[UIView alloc] initWithFrame:CGRectMake(self.leftTableView.frame.origin.x + self.leftTableView.frame.size.width, kChartBorderLineWidth, kTitleContentSeperateLineWidth, self.leftTableView.frame.size.height + kTopTitleHeight + kTitleLineWidth)];
     vLine.backgroundColor = kLineInsideColer;
     [self addSubview:vLine];
+    UIView *hLine = [[UIView alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, leftTitle.frame.origin.y + leftTitle.frame.size.height, kLeftItemWidth, kTitleLineWidth)];
+    hLine.backgroundColor = kTopLineColor;
+    [self addSubview:hLine];
 }
 #pragma mark - 右边内容栏
 -(void)createContentCollectionView{
@@ -105,7 +117,7 @@
     //减去0.5是为了消除黑线，如果调整了黑线的宽度，可以微调这个数来消除黑线
     self.contentScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(scrollX - 0.5, self.leftTableView.frame.origin.y - 0.5, self.frame.size.width - kChartBorderLineWidth - scrollX, self.leftTableView.frame.size.height)];
     //self.contentScrollView.backgroundColor = [UIColor orangeColor];
-    self.contentScrollView.contentSize = CGSizeMake(self.contentScrollView.frame.size.width, kContentItemHeight * self.leftData.count);
+    self.contentScrollView.contentSize = CGSizeMake(self.contentScrollView.frame.size.width, kContentItemHeight * (self.leftData.count - 1));
     self.contentScrollView.delegate = self;
     self.contentScrollView.bounces = NO;
     self.contentScrollView.showsVerticalScrollIndicator = NO;
@@ -117,7 +129,8 @@
     flow.minimumLineSpacing = 0;
     flow.minimumInteritemSpacing = 0;
     flow.itemSize = CGSizeMake(kContentItemWidth, kContentItemHeight);
-    self.contentCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, self.contentScrollView.frame.size.width, kContentItemHeight * self.leftData.count) collectionViewLayout:flow];
+    //减去0.2是为了消去黑线
+    self.contentCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0 - 0.2, self.contentScrollView.frame.size.width, kContentItemHeight * (self.leftData.count - 1)) collectionViewLayout:flow];
     self.contentCollectionView.backgroundColor = [UIColor whiteColor];
     self.contentCollectionView.delegate = self;
     self.contentCollectionView.dataSource = self;
@@ -126,6 +139,31 @@
     self.contentCollectionView.showsHorizontalScrollIndicator = NO;
     [self.contentScrollView addSubview:self.contentCollectionView];
     [self.contentCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:kContentCollectionId];
+    //顶部标题栏
+    self.rightTopScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(self.contentScrollView.frame.origin.x, kChartBorderLineWidth, self.contentScrollView.frame.size.width, kTopTitleHeight + kTitleLineWidth)];
+    [self addSubview:self.rightTopScrollView];
+    self.rightTopScrollView.contentSize = CGSizeMake(kContentItemHeight * self.topTitleData.count, 0);
+    self.rightTopScrollView.showsHorizontalScrollIndicator = NO;
+    self.rightTopScrollView.bounces = NO;
+    self.rightTopScrollView.delegate = self;
+    for (int i = 0; i < self.topTitleData.count; i ++) {
+        UILabel *rightTopTitle = [[UILabel alloc] initWithFrame:CGRectMake(i * (kContentItemWidth + kTitleLineWidth), 0, kContentItemWidth, kTopTitleHeight)];
+        rightTopTitle.text = self.topTitleData[i];
+        rightTopTitle.textAlignment = NSTextAlignmentCenter;
+        rightTopTitle.font = [UIFont systemFontOfSize:kTopTitleFont];
+        rightTopTitle.textColor = kTopTitleColor;
+//        rightTopTitle.layer.borderColor = kTopTitleColor.CGColor;
+//        rightTopTitle.layer.borderWidth = kTitleLineWidth;
+//        rightTopTitle.clipsToBounds = YES;
+        rightTopTitle.backgroundColor = [UIColor clearColor];
+        [self.rightTopScrollView addSubview:rightTopTitle];
+        UIView *topVLine = [[UIView alloc] initWithFrame:CGRectMake((i + 1) * (kContentItemWidth + kTitleLineWidth) -  (i+1) *kContentLineWidth*1.3, 0, 0.5, kTopTitleHeight)];
+        topVLine.backgroundColor = kLineInsideColer;
+        [self.rightTopScrollView addSubview:topVLine];
+    }
+    UIView *hLine = [[UIView alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, kTopTitleHeight, self.rightTopScrollView.contentSize.width, kTitleLineWidth)];
+    hLine.backgroundColor = kTopLineColor;
+    [self.rightTopScrollView addSubview:hLine];
 }
 #pragma mark-tableView Delegate相关
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
@@ -136,7 +174,7 @@
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     if (tableView == self.leftTableView) {
-        return self.leftData.count;
+        return self.leftData.count >= 1 ? self.leftData.count - 1: 0;
     }
     return 0;
 }
@@ -153,7 +191,7 @@
             [view removeFromSuperview];
         }
         UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, cell.bounds.size.width, cell.bounds.size.height)];
-        title.text = self.leftData[indexPath.row];
+        title.text = self.leftData[indexPath.row + 1];
         title.textAlignment = NSTextAlignmentCenter;
         title.textColor = kLeftTitleColor;
         title.font = [UIFont systemFontOfSize:kLeftTitleFont];
@@ -183,12 +221,12 @@
     return self.topTitleData.count;
 }
 -(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
-    return self.leftData.count;
+    return self.leftData.count - 1;
 }
 -(void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath{
-    if (indexPath.row == 0) {
-        return ;
-    }
+//    if (indexPath.row == 0) {
+//        return ;
+//    }
     if (self.contentAllImages.count) {
         [self createChartAllImagesContentWith:cell indexpath:indexPath];
     }else if (self.contentAllTitles.count) {
@@ -208,38 +246,38 @@
         cell.layer.borderWidth = kContentLineWidth;
         cell.layer.borderColor = kLineInsideColer.CGColor;
         cell.clipsToBounds = YES;
-        if (indexPath.row == 0) {
-            UILabel *content = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, cell.bounds.size.width, cell.bounds.size.height)];
-            content.font = [UIFont systemFontOfSize:kTopTitleFont];
-            content.textAlignment = NSTextAlignmentCenter;
-            [cell.contentView addSubview:content];
-            content.text = self.topTitleData[indexPath.section];
-        }
+//        if (indexPath.row == 0) {
+//            UILabel *content = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, cell.bounds.size.width, cell.bounds.size.height)];
+//            content.font = [UIFont systemFontOfSize:kTopTitleFont];
+//            content.textAlignment = NSTextAlignmentCenter;
+//            [cell.contentView addSubview:content];
+//            content.text = self.topTitleData[indexPath.section];
+//        }
         return cell;
     }
     return nil;
 }
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     if (collectionView == self.contentCollectionView) {
-        if (indexPath.row != 0) {
+       // if (indexPath.row != 0) {
             if ([self.delegate respondsToSelector:@selector(chartViewDidSelecteItemAtRow:column:)]) {
-                [self.delegate chartViewDidSelecteItemAtRow:indexPath.row - 1 column:indexPath.section];
+                [self.delegate chartViewDidSelecteItemAtRow:indexPath.row column:indexPath.section];
                 //[self.delegate performSelector:@selector(chartViewDidSelecteItemAtRow:column:) withObject:nil];
             }
-            NSLog(@"选中item：第%d行  %d列",indexPath.row - 1,indexPath.section);
-        }
+            NSLog(@"选中item：第%d行  %d列",indexPath.row,indexPath.section);
+       // }
     }
     
 }
 #pragma mark - 创建表格内容视图
 -(void)createChartAllImagesContentWith:(UICollectionViewCell *)cell indexpath:(NSIndexPath *)indexPath{
     UIImageView *image = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, kContentItemHeight, kContentItemWidth)];
-    image.image = [UIImage imageNamed:self.contentAllImages[indexPath.section * (self.leftData.count - 1) + indexPath.row - 1]];
+    image.image = [UIImage imageNamed:self.contentAllImages[indexPath.section * (self.leftData.count - 1) + indexPath.row]];
     [cell.contentView addSubview:image];
 }
 -(void)createChartAllTitlesContentWith:(UICollectionViewCell *)cell indexpath:(NSIndexPath *)indexPath{
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, kContentItemHeight, kContentItemWidth)];
-    label.text = self.contentAllTitles[indexPath.section * (self.leftData.count - 1) + indexPath.row - 1];
+    label.text = self.contentAllTitles[indexPath.section * (self.leftData.count - 1) + indexPath.row];
     label.textAlignment = NSTextAlignmentCenter;
     label.font = [UIFont systemFontOfSize:kContentTitleFont];
     label.textColor = kContentTitleColor;
@@ -250,7 +288,7 @@
         NSArray *arr = dic.allKeys;
         NSMutableString *keyString = [NSMutableString stringWithString:arr[0]];
         NSArray *locationInfos = [keyString componentsSeparatedByString:@":"];
-        if (([locationInfos[0] integerValue] == indexPath.row - 1) && [locationInfos[1] integerValue] == indexPath.section) {
+        if (([locationInfos[0] integerValue] == indexPath.row) && [locationInfos[1] integerValue] == indexPath.section) {
             UIImageView *image = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, kContentItemHeight, kContentItemWidth)];
             image.image = [UIImage imageNamed:dic[keyString]];
             [cell.contentView addSubview:image];
@@ -262,7 +300,7 @@
         NSArray *arr = dic.allKeys;
         NSMutableString *keyString = [NSMutableString stringWithString:arr[0]];
         NSArray *locationInfos = [keyString componentsSeparatedByString:@":"];
-        if (([locationInfos[0] integerValue] == indexPath.row - 1) && [locationInfos[1] integerValue] == indexPath.section) {
+        if (([locationInfos[0] integerValue] == indexPath.row) && [locationInfos[1] integerValue] == indexPath.section) {
             UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, kContentItemHeight, kContentItemWidth)];
             label.text = dic[keyString];
             label.textAlignment = NSTextAlignmentCenter;
@@ -277,7 +315,15 @@
     if (scrollView == self.leftTableView) {
         self.contentScrollView.contentOffset = scrollView.contentOffset;
     }else if (scrollView == self.contentScrollView) {
-        self.leftTableView.contentOffset = scrollView.contentOffset;
+        self.leftTableView.contentOffset = CGPointMake(0, scrollView.contentOffset.y);
+        CGPoint offset = self.rightTopScrollView.contentOffset;
+        self.rightTopScrollView.contentOffset = CGPointMake(self.contentCollectionView.contentOffset.x, offset.y);
+    }else if (scrollView == self.rightTopScrollView) {
+        CGPoint offset = self.contentCollectionView.contentOffset;
+        self.contentCollectionView.contentOffset = CGPointMake(scrollView.contentOffset.x, offset.y);
+    }else if (scrollView == self.contentCollectionView) {
+        CGPoint offset = self.rightTopScrollView.contentOffset;
+        self.rightTopScrollView.contentOffset = CGPointMake(self.contentCollectionView.contentOffset.x, offset.y);
     }
 }
 
