@@ -36,7 +36,7 @@
     }
     charView = [[ChartView alloc] initWithFrame:CGRectMake(10, 80, kScreenWidth - 20, kscreenHeight - 290) leftTitles:leftTitles topTitles:topTitles itemAllTitleDatas:allTitles];
 #else
-    //PS：下面的数据可能比表格的个数多，仅做测试用
+    //PS：下面的数据可能多于单元格展示的个数，仅做测试用
     NSMutableArray *allImages = [NSMutableArray arrayWithCapacity:5];
     for (int i =0; i < (leftTitles.count - 1) * topTitles.count; i ++) {
         [allImages addObject:@"fullOrdered"];

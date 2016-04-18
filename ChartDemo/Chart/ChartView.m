@@ -79,11 +79,11 @@
 #pragma mark - 左边标题栏
 -(void)createLeftTableView{
     //第一行标题
-    UILabel *leftTitle = [[UILabel alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, kChartBorderLineWidth, kLeftItemWidth, kTopTitleHeight)];
-    leftTitle.text = self.leftData[0];
-    leftTitle.font = [UIFont systemFontOfSize:kLeftTopTitleFont];
+    UILabel *leftTitle      = [[UILabel alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, kChartBorderLineWidth, kLeftItemWidth, kTopTitleHeight)];
+    leftTitle.text          = self.leftData[0];
+    leftTitle.font          = [UIFont systemFontOfSize:kLeftTopTitleFont];
     leftTitle.textAlignment = NSTextAlignmentCenter;
-    leftTitle.textColor = kLeftTopTitleColor;
+    leftTitle.textColor     = kLeftTopTitleColor;
     [self addSubview:leftTitle];
     
     CGFloat tableHeight = kContentItemHeight * (self.leftData.count - 1);
@@ -92,7 +92,7 @@
         tempFrame.size.height = tableHeight;
         self.frame            = tempFrame;
     }else if (self.frame.size.height < tableHeight){
-        tableHeight = self.frame.size.height;
+        tableHeight           = self.frame.size.height;
     }
     self.leftTableView = [[UITableView alloc] initWithFrame:CGRectMake(kChartBorderLineWidth, kChartBorderLineWidth + kTopTitleHeight, kLeftItemWidth, tableHeight - kTopTitleHeight) style:UITableViewStylePlain];
     self.leftTableView.dataSource                     = self;
